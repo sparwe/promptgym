@@ -1,5 +1,4 @@
 import pandas as pd
-from pathlib import Path
 from promptgym.evaluation.runner import run_once
 from promptgym.evaluation.metrics import compute_metrics
 from promptgym.dataio.dataset import PromptTaskDataset
@@ -20,7 +19,7 @@ def test_omniscient_regret_zero():
 def test_runner_parquet(tmp_path):
     df = run_once("random", seed=0, budget=2)
     out = tmp_path/"test.parquet"
-    df.to_parquet(out)
-    loaded = pd.read_parquet(out)
+    df.to_parquet(out, engine="pyarrow")
+    loaded = pd.read_parquet(out, engine="pyarrow")
     assert not loaded.empty
 

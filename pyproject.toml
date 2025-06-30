@@ -4,7 +4,7 @@ version = "0.0.1"
 description = "Prompt optimization test-bed"
 readme = "README.md"
 requires-python = ">=3.8"
-dependencies = ["pandas>=2.0"]
+dependencies = ["pandas>=2.0", "pyarrow>=14.0"]
 
 [project.optional-dependencies]
 dev = ["pytest", "ruff", "black"]
