@@ -2,7 +2,8 @@ class BaseAgent:
     def __init__(self, config=None):
         self.config = config or {}
 
-    def act(self, obs) -> int:
+    def act(self, obs) -> tuple[int, int]:
+        """Return a (prompt_id, task_id) pair."""
         raise NotImplementedError
 
     def update(self, obs, reward):

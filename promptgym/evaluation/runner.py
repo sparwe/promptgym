@@ -8,7 +8,11 @@ from ..agents import REGISTRY, BaseAgent
 def run_once(agent_name: str, seed: int, budget: int | None = None):
     ds = PromptTaskDataset().permute(seed)
     env = PromptOptEnv(ds, budget)
-    agent = REGISTRY[agent_name]({"num_prompts": ds.num_prompts, "budget": budget})
+    agent = REGISTRY[agent_name]({
+        "num_prompts": ds.num_prompts,
+        "num_tasks": ds.num_tasks,
+        "budget": budget,
+    })
     obs = env.reset()
     log = []
     for step in range(env.budget):
@@ -18,8 +22,14 @@ def run_once(agent_name: str, seed: int, budget: int | None = None):
         if getattr(agent.__class__, "current_best", BaseAgent.current_best) is not BaseAgent.current_best:
             best = agent.current_best()
         else:
-            best = a
-        log.append({"step": step, "prompt": a, "reward": r, "agent_best": best})
+            best = a[0]
+        log.append({
+            "step": step,
+            "prompt": a[0],
+            "task": a[1],
+            "reward": r,
+            "agent_best": best,
+        })
         if done:
             break
     return pd.DataFrame(log)

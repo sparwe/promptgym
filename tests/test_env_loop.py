@@ -8,8 +8,10 @@ def test_env_loop():
     obs = env.reset()
     done = False
     steps = 0
+    task = 0
     while not done:
-        obs, r, done, _ = env.step(0)
+        obs, r, done, _ = env.step((0, task))
+        task += 1
         steps += 1
     assert env.step_n == steps
 
