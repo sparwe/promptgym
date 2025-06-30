@@ -7,8 +7,8 @@ def compute_metrics(log_df: pd.DataFrame, seed: int) -> dict:
     regrets = []
     cum_rewards = []
     total = 0
-    for step, row in log_df.iterrows():
-        task = step  # tasks advanced one per step
+    for _, row in log_df.iterrows():
+        task = row['task']
         best_reward = ds.reward(row['agent_best'], task)
         optimal = ds.mat[:, task].max()
         regrets.append(optimal - best_reward)

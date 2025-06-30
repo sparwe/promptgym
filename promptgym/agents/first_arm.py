@@ -1,6 +1,6 @@
 from .base import BaseAgent
 
 class FirstArm(BaseAgent):
-    def act(self, obs) -> int:
-        return 0
+    def act(self, obs) -> tuple[int, int]:
+        return (0, 0)
 
