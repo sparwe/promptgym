@@ -1,7 +1,17 @@
 [project]
 name = "promptgym"
-version = "0.1.0"
-description = "Add your description here"
+version = "0.0.1"
+description = "Prompt optimization test-bed"
 readme = "README.md"
-requires-python = ">=3.13"
-dependencies = []
+requires-python = ">=3.8"
+dependencies = ["pandas>=2.0"]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff", "black"]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["promptgym*"]
