@@ -3,6 +3,7 @@ name: Nightly
 on:
   schedule:
     - cron: '0 0 * * *'
+  workflow_dispatch:
 
 jobs:
   eval:
@@ -20,7 +21,7 @@ jobs:
         run: |
           python -m promptgym.evaluation.runner --agent ${{matrix.agent}} --seed ${{matrix.seed}} --outdir runs
       - name: Upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: runs-${{matrix.agent}}-${{matrix.seed}}
           path: runs
