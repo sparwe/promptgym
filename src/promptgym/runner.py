@@ -30,9 +30,9 @@ def _step(env: Environment, action: Action) -> Result | None:
         case EvalAction(arm=arm, task=task):
             y = env.eval(arm, task)
             return EvalResult(arm=arm, task=task, y=y)
-        case CreateAction(spec=spec):
+        case CreateAction(template_arm=template_arm, spec=spec):
             try:
-                arm_id = env.create(spec)
+                arm_id = env.create(template_arm=template_arm, spec=spec)
                 return CreateResult(ok=True, arm_id=arm_id)
             except Exception as exc:  # defensive guard
                 return CreateResult(ok=False, meta={"error": str(exc)})

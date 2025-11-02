@@ -38,18 +38,18 @@ class RaschEnv(Environment):
             raise IndexError(f"task index {task} out of range [0, {self.n_tasks()-1}]")
         return self._observations[arm, task]
 
-    def create(self, template_arm: Optional[int] = None) -> int:
+    def create(self, template_arm: Optional[int] = None, **kwargs) -> int:
         if not self.allow_create:
             raise ValueError("Creation action not allowed.")
         if template_arm is None:
             template_arm = self._rng.integers(self.n_arms())
-        new_skill = self.skill[template_arm] + self.rng.random.normal(0.0, self.create_scale)
+        new_skill = self.skill[template_arm] + self.rng.normal(0.0, self.create_scale)
         new_logits = new_skill - self.difficulty 
         p = 1.0 / (1.0 + np.exp(-new_logits))
-        new_observations = self.rng.random.binomial(p=p, n=1)
+        new_observations = self.rng.binomial(p=p, n=1)
         self._observations = np.vstack([self._observations, new_observations])
         self.skill = np.append(self.skill, new_skill)
-        return self.n_arms()
+        return self.n_arms() - 1
 
     def n_arms(self) -> int:
         return self._observations.shape[0]

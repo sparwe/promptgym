@@ -2,7 +2,7 @@ from __future__ import annotations
 import numpy as np
 from typing import Dict, Any
 from ..env import Environment
-from .base import Action, EvalAction, StopAction, EvalResult, CreateResult, Strategy
+from .base import Action, EvalAction, CreateAction, StopAction, EvalResult, CreateResult, Strategy
 
 class RandomBaseline(Strategy):
     """Uniform random unseen (arm, task) pairs until budget or exhaustion."""
@@ -21,12 +21,12 @@ class RandomBaseline(Strategy):
         if self.done: return StopAction(reason="done")
         if self.env.allow_create and np.random.rand() < self.creation_prob:
             best_arm = self.select_winner()
-            return CreateAction(best_arm)
+            return CreateAction(template_arm=best_arm)
         unseen = np.argwhere(self.observations.mask)
         if unseen.size == 0:
             if self.env.allow_create():
                 best_arm = self.select_winner()
-                return CreateAction(best_arm)
+                return CreateAction(template_arm=best_arm)
             return StopAction(rationale="exhausted_all_actions")
         i, j = unseen[self.rng.integers(0, len(unseen))]
         return EvalAction(arm=i, task=j)
@@ -37,7 +37,7 @@ class RandomBaseline(Strategy):
                 self.observations[arm, task] = y
                 self.spend += 1
             case CreateResult(ok=ok, arm_id=arm_id, meta=meta):
-                self.observations = np.ma.vstack(self.observations, np.ma.masked_all(n, dtype=bool))
+                self.observations = np.ma.vstack([self.observations, np.ma.masked_all(self.env.n_tasks(), dtype=bool)])
                 self.spend += 1
             case _:
                 raise TypeError(f"Unexpected Result type: {type(result)}")
