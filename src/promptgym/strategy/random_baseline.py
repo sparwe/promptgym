@@ -1,16 +1,15 @@
 from __future__ import annotations
 import numpy as np
 from typing import Dict, Any
-from ..envs import Environment
-from ..core import Action, EvalAction, StopAction, EvalResult, CreateResult
-from .base import Strategy
+from ..env import Environment
+from .base import Action, EvalAction, StopAction, EvalResult, CreateResult, Strategy
 
 class RandomBaseline(Strategy):
     """Uniform random unseen (arm, task) pairs until budget or exhaustion."""
     def __init__(self, env: Environment, budget=1000, creation_prob: float = 0.0, seed: int = None):
         self.env = env
         self.rng = np.random.default_rng(seed)
-        self.observations = np.ma.masked_all((self.env.n_arms, self.env.n_tasks), dtype=bool)
+        self.observations = np.ma.masked_all((self.env.n_arms(), self.env.n_tasks()), dtype=bool)
         self.done = False
         self.budget = budget
         self.creation_prob = creation_prob
@@ -23,7 +22,7 @@ class RandomBaseline(Strategy):
         if self.env.allow_create and np.random.rand() < self.creation_prob:
             best_arm = self.select_winner()
             return CreateAction(best_arm)
-        unseen = np.argwhere(seen.mask)
+        unseen = np.argwhere(self.observations.mask)
         if unseen.size == 0:
             if self.env.allow_create():
                 best_arm = self.select_winner()
@@ -35,10 +34,10 @@ class RandomBaseline(Strategy):
     def update(self, result: Result) -> None:
         match result:
             case EvalResult(arm=arm, task=task, y=y, meta=meta):
-                print(f"EvalResult → arm={arm}, task={task}, y={y}, meta={meta}")
+                self.observations[arm, task] = y
                 self.spend += 1
             case CreateResult(ok=ok, arm_id=arm_id, meta=meta):
-                print(f"CreateResult → ok={ok}, arm_id={arm_id}")
+                self.observations = np.ma.vstack(self.observations, np.ma.masked_all(n, dtype=bool))
                 self.spend += 1
             case _:
                 raise TypeError(f"Unexpected Result type: {type(result)}")
@@ -47,5 +46,5 @@ class RandomBaseline(Strategy):
     def is_done(self) -> bool:
         return self.done
 
-    def select_winner(self): -> int:
-        return np.argmax(np.mean(seen, axis=1) - 2*np.std(seen, axis=1, ddof=1))
+    def select_winner(self) -> int:
+        return np.argmax(np.mean(self.observations, axis=1)) # - 2*np.std(self.observations, axis=1, ddof=1))
